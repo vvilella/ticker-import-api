@@ -31,9 +31,10 @@ public class FtpService {
 	@Value("${ftp.pass}")
 	private String ftpPassword;
 
-	private FTPClient ftpClient;
+	@Value("${ftp.root}")
+	private String rootDirectory;
 
-	private static String ROOT_DIRECTORY = "MarketData/";
+	private FTPClient ftpClient;
 
 	@PostConstruct
 	private void init() throws SocketException, IOException {
@@ -47,7 +48,7 @@ public class FtpService {
 	}
 
 	public List<String> ListFiles(String directory) throws SocketException, IOException {
-		String[] files = ftpClient.listNames(ROOT_DIRECTORY + directory);
+		String[] files = ftpClient.listNames(rootDirectory + directory);
 		return Arrays.asList(files);
 	}
 

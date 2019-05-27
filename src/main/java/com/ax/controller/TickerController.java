@@ -29,8 +29,9 @@ public class TickerController {
 
 	@Async
 	@RequestMapping("/load")
-	public String process() {
-		return "Done";
+	public void process(@RequestParam("segment") String segment, @RequestParam("type") String type,
+			@RequestParam("date") String date) {
+		orquestrator.LoadFile(segment, type, date);
 	}
 
 	@RequestMapping("/find")

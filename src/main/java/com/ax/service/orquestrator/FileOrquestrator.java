@@ -6,6 +6,7 @@ import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,8 +22,11 @@ public class FileOrquestrator {
 	@Autowired
 	FtpService ftp;
 
-	@Value("${orquestrator.directories}")
-	private String directories;
+	@Value("${orquestrator.segments}")
+	private String segments;
+	
+	@Value("${orquestrator.type}")
+	private String fileType;
 
 	@Value("${orquestrator.bucketname}")
 	private String bucketName;
@@ -31,7 +35,7 @@ public class FileOrquestrator {
 	private String temporaryDirectory;
 
 	public void SyncFiles() {
-		Arrays.asList(directories.split(";")).forEach(item -> syncDirectory(item));
+		Arrays.asList(segments.split(";")).forEach(item -> syncDirectory(item));
 	}
 
 	private void syncDirectory(String directory) {
@@ -72,9 +76,29 @@ public class FileOrquestrator {
 		}
 	}
 
-	public void LoadFile(String type, String date) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void LoadFile(String segment, String type, String date) {
+		try {
+			if (segments.contains(segment) && fileType.contains(type)) {
 
+				List<StorageObject> bucketFiles = StorageClient.listBucket(bucketName);
+
+				List<StorageObject> selectedFiles = bucketFiles.stream()
+						.filter(it -> it.getName().toLowerCase().contains("/" + type.toLowerCase() + "/"))
+						.collect(Collectors.toList());
+
+				for (StorageObject it : selectedFiles) {
+					System.out.println(it.getName());
+				}
+			} else {
+				System.out.println("Invalid directory!");
+			}
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (GeneralSecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }
