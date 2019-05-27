@@ -2,10 +2,8 @@ package com.ax.service.ftp;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.SocketException;
 import java.util.Arrays;
@@ -36,7 +34,7 @@ public class FtpService {
 	private FTPClient ftpClient;
 
 	private static String ROOT_DIRECTORY = "MarketData/";
-	
+
 	@PostConstruct
 	private void init() throws SocketException, IOException {
 		if (ftpClient == null) {
@@ -44,7 +42,7 @@ public class FtpService {
 			ftpClient.connect(ftpServer, ftpPort);
 			ftpClient.login(ftpUser, ftpPassword);
 			ftpClient.enterLocalPassiveMode();
-            ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
+			ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
 		}
 	}
 
@@ -52,12 +50,14 @@ public class FtpService {
 		String[] files = ftpClient.listNames(ROOT_DIRECTORY + directory);
 		return Arrays.asList(files);
 	}
-	
-	public void Download(String ftpFile, String tempFile) throws IOException {
-        File downloadFile = new File(tempFile);
-        OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(downloadFile));
-        boolean success = ftpClient.retrieveFile(ftpFile, outputStream);
-        outputStream.close();
+
+	public boolean Download(String ftpFile, String tempFile) throws IOException {
+		File downloadFile = new File(tempFile);
+		downloadFile.getParentFile().mkdirs();
+		OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(downloadFile));
+		boolean success = ftpClient.retrieveFile(ftpFile, outputStream);
+		outputStream.close();
+		return success;
 	}
 
 }

@@ -22,13 +22,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import com.google.api.client.http.InputStreamContent;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.model.Bucket;
-import com.google.api.services.storage.model.ObjectAccessControl;
 import com.google.api.services.storage.model.Objects;
 import com.google.api.services.storage.model.StorageObject;
 
@@ -107,10 +105,7 @@ public class StorageClient {
     contentStream.setLength(file.length());
     StorageObject objectMetadata = new StorageObject()
         // Set the destination object name
-        .setName(name)
-        // Set the access control list to publicly read-only
-        .setAcl(Arrays.asList(
-            new ObjectAccessControl().setEntity("allUsers").setRole("READER")));
+        .setName(name);
 
     // Do the insert
     Storage client = StorageFactory.getService();
