@@ -27,6 +27,7 @@ public class TickerController {
 		orquestrator.SyncFiles();
 	}
 
+	@Async
 	@RequestMapping("/load")
 	public String process() {
 		return "Done";

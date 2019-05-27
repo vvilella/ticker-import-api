@@ -72,4 +72,9 @@ public class FileOrquestrator {
 		}
 	}
 
+	public void LoadFile(String type, String date) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
