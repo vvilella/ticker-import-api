@@ -1,6 +1,5 @@
 package com.ax.controller;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,46 +9,31 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ax.model.TickModel;
 import com.ax.repository.TickerRepository;
-import com.ax.service.CsvService;
+import com.ax.service.orquestrator.FileOrquestrator;
 
 @RestController
-public class TickerImportController {
-	@Autowired
-	CsvService processor;
+public class TickerController {
+
 	@Autowired
 	TickerRepository repository;
-	
+
+	@Autowired
+	FileOrquestrator orquestrator;
+
 	@RequestMapping("/sync")
-	public void Sync() {
-		
+	public String Sync() {
+		orquestrator.SyncFiles();
+		return "sync ok!";
 	}
-	
-	
 
 	@RequestMapping("/load")
 	public String process() {
-
-		try {
-			// CsvProcessor processor = new CsvProcessor();
-			processor.ProcessFile();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
 		return "Done";
 	}
 
 	@RequestMapping("/find")
-	public Iterable<TickModel> findAll() {
-
-		return repository.findAll();
-	}
-
-	@RequestMapping("/find/{symbol}")
 	public List<TickModel> findById(@RequestParam("symbol") String symbol) {
-		return repository.findBySimbolo(symbol);
+		return null;
 	}
-
 
 }
