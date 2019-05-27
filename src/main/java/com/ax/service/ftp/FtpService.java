@@ -1,10 +1,20 @@
 package com.ax.service.ftp;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.SocketException;
+import java.util.Arrays;
+import java.util.List;
 
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPFile;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -23,13 +33,31 @@ public class FtpService {
 	@Value("${ftp.pass}")
 	private String ftpPassword;
 
-	public void ListFiles(String directory) throws SocketException, IOException {
-		FTPClient client = new FTPClient();
-		client.connect(ftpServer, ftpPort);
-		client.login(ftpUser, ftpPassword);
-		FTPFile[] files = client.listFiles(directory);
-		for (FTPFile file : files) {
-			System.out.println(file.getName());
+	private FTPClient ftpClient;
+
+	private static String ROOT_DIRECTORY = "MarketData/";
+	
+	@PostConstruct
+	private void init() throws SocketException, IOException {
+		if (ftpClient == null) {
+			ftpClient = new FTPClient();
+			ftpClient.connect(ftpServer, ftpPort);
+			ftpClient.login(ftpUser, ftpPassword);
+			ftpClient.enterLocalPassiveMode();
+            ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
 		}
 	}
+
+	public List<String> ListFiles(String directory) throws SocketException, IOException {
+		String[] files = ftpClient.listNames(ROOT_DIRECTORY + directory);
+		return Arrays.asList(files);
+	}
+	
+	public void Download(String ftpFile, String tempFile) throws IOException {
+        File downloadFile = new File(tempFile);
+        OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(downloadFile));
+        boolean success = ftpClient.retrieveFile(ftpFile, outputStream);
+        outputStream.close();
+	}
+
 }
