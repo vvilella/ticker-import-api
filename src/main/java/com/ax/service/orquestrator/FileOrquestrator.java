@@ -3,6 +3,7 @@ package com.ax.service.orquestrator;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.ax.service.csv.CsvService;
 import com.ax.service.ftp.FtpService;
 import com.ax.service.storage.StorageClient;
 import com.google.api.services.storage.model.StorageObject;
@@ -21,12 +23,15 @@ public class FileOrquestrator {
 
 	@Autowired
 	FtpService ftp;
+	
+	@Autowired
+	CsvService csv;
 
 	@Value("${orquestrator.segments}")
 	private String segments;
-	
+
 	@Value("${orquestrator.type}")
-	private String fileType;
+	private String fileTypes;
 
 	@Value("${orquestrator.bucketname}")
 	private String bucketName;
@@ -78,19 +83,17 @@ public class FileOrquestrator {
 
 	public void LoadFile(String segment, String type, String date) {
 		try {
-			if (segments.contains(segment) && fileType.contains(type)) {
 
-				List<StorageObject> bucketFiles = StorageClient.listBucket(bucketName);
+			String fileName = buildFileName(segment, type, date);
 
-				List<StorageObject> selectedFiles = bucketFiles.stream()
-						.filter(it -> it.getName().toLowerCase().contains("/" + type.toLowerCase() + "/"))
-						.collect(Collectors.toList());
+			List<StorageObject> bucketFiles = StorageClient.listBucket(bucketName);
 
-				for (StorageObject it : selectedFiles) {
-					System.out.println(it.getName());
-				}
-			} else {
-				System.out.println("Invalid directory!");
+			List<StorageObject> selectedFiles = bucketFiles.stream()
+					.filter(it -> it.getName().contains(fileName)).collect(Collectors.toList());
+
+			for (StorageObject it : selectedFiles) {
+				String downloadedFile = downloadFromBucket(it.getName());
+				csv.ProcessFile(downloadedFile);
 			}
 
 		} catch (IOException e) {
@@ -100,5 +103,21 @@ public class FileOrquestrator {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	private String downloadFromBucket(String name) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private String buildFileName(String segment, String type, String date) {
+		String fileName = null;
+
+		if (segments.contains(segment) && fileTypes.contains(type) && date != null) {
+			fileName = MessageFormat.format("{0}/{1}/{2}_{1}_{3}", "MarketData", segment, type, date);
+		}
+
+		return fileName;
+
 	}
 }
