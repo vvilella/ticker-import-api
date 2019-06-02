@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.ax.model.TickModel;
@@ -13,15 +14,19 @@ import com.ax.model.TickModel;
 @Component
 public class CustomTickerRepository {
 
-	private final String url = "jdbc:postgresql://35.198.26.13:5432/postgres";
-	private final String user = "postgres";
-	private final String password = "tickerDB";
+	@Value("${spring.datasource.url}")
+	private String url;
+
+	@Value("${spring.datasource.username}")
+	private String user;
+
+	@Value("${spring.datasource.password}")
+	private String password;
 
 	public Connection getConnection() {
 		Connection conn = null;
 		try {
 			conn = DriverManager.getConnection(url, user, password);
-			System.out.println("Connected to the PostgreSQL server successfully.");
 
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
@@ -46,9 +51,9 @@ public class CustomTickerRepository {
 			ps.setString(2, t.getCondicaoOfertaVenda());
 			ps.setInt(3, t.getCorretoraCompra());
 			ps.setInt(4, t.getCorretoraVenda());
-			ps.setDate(5, new java.sql.Date (t.getDataOfertaCompra().getTime()));
-			ps.setDate(6, new java.sql.Date (t.getDataOfertaVenda().getTime()));
-			ps.setDate(7, new java.sql.Date (t.getDataSessao().getTime()));
+			ps.setDate(5, new java.sql.Date(t.getDataOfertaCompra().getTime()));
+			ps.setDate(6, new java.sql.Date(t.getDataOfertaVenda().getTime()));
+			ps.setDate(7, new java.sql.Date(t.getDataSessao().getTime()));
 			ps.setLong(8, t.getGenerationIdCompra());
 			ps.setLong(9, t.getGenerationIdVenda());
 			ps.setTimestamp(10, t.getHora());
@@ -67,7 +72,7 @@ public class CustomTickerRepository {
 				ps.executeBatch();
 			}
 		}
-		ps.executeBatch(); 
+		ps.executeBatch();
 		ps.close();
 		connection.close();
 

@@ -36,7 +36,7 @@ public class TickerController {
 
 	@RequestMapping("/find")
 	public List<TickModel> findById(@RequestParam("symbol") String symbol) {
-		return null;
+		return repository.findBySimbolo(symbol);
 	}
 
 }

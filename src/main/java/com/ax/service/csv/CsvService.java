@@ -3,7 +3,6 @@ package com.ax.service.csv;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
@@ -15,9 +14,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -35,36 +32,21 @@ public class CsvService {
 	CustomTickerRepository customRepository;
 	List<TickModel> ticks;
 
-	public void ProcessFile() throws IOException {
+	public void ImportFile(File file) throws IOException {
 
-		String mainPath = "/Users/victor.vilella/zup/pessoal/ticks";
-		File file = new File(mainPath);
-		String[] files = file.list(new FilenameFilter() {
-			@Override
-			public boolean accept(File current, String name) {
-				// return new File(current, name).isDirectory();
-				return name.contains(".zip");
-			}
-		});
-		System.out.println(Arrays.toString(files));
+		Path zipPath = file.toPath();
+		Path txtPath = Paths.get(file.getParent(), file.getName().replace(".zip", ".txt"));
 
-		for (Iterator<String> i = Arrays.asList(files).iterator(); i.hasNext();) {
+		unzip(zipPath.toString(), file.getParent());
 
-			String fileName = i.next();
-			Path zipPath = Paths.get(mainPath, fileName);
-			Path txtPath = Paths.get(mainPath, fileName.replace(".zip", ".txt"));
+		if (txtPath.toFile().exists()) {
+			System.out.println("Start: " + new Date());
+			processFile(txtPath);
+			saveTicks();
+			Files.delete(txtPath);
+			moveProcessedFile(zipPath);
+			System.out.println("End: " + new Date());
 
-			unzip(zipPath.toString(), mainPath);
-
-			if (txtPath.toFile().exists()) {
-				System.out.println("Start: " + new Date());
-				processFile(txtPath);
-				saveTicks();
-				Files.delete(txtPath);
-				moveProcessedFile(zipPath);
-				System.out.println("End: " + new Date());
-
-			}
 		}
 	}
 
@@ -172,14 +154,9 @@ public class CsvService {
 
 			ticks.add(tick);
 
-			if (ticks.size() >= 300000) {
+			if (ticks.size() >= 100000) {
 				saveTicks();
 			}
 		}
-	}
-
-	public void ProcessFile(String downloadedFile) {
-		// TODO Auto-generated method stub
-		
 	}
 }
