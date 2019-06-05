@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -43,8 +44,19 @@ public class FileOrquestrator {
 	@Value("${orquestrator.temporary.directory.bucket}")
 	private String temporaryDirectoryBucket;
 
-	public void SyncFiles() {
+	private void syncAllDirectories() {
 		Arrays.asList(segments.split(";")).forEach(item -> syncDirectory(item));
+	}
+
+	public void SyncFiles(String segment) {
+
+		if (segment == null) {
+			syncAllDirectories();
+		} else {
+			if (segments.contains(segment)) {
+				syncDirectory(segment);
+			}
+		}
 	}
 
 	private void syncDirectory(String directory) {
@@ -69,11 +81,9 @@ public class FileOrquestrator {
 			}
 
 		} catch (IOException e) {
-			System.err.println(e.getMessage());
-			System.exit(1);
+			e.printStackTrace();
 		} catch (Throwable t) {
 			t.printStackTrace();
-			System.exit(1);
 		}
 	}
 
@@ -125,4 +135,25 @@ public class FileOrquestrator {
 		return fileName;
 
 	}
+
+	public List<String> GetSavedFiles() {
+
+		List<String> returnFiles = new ArrayList<String>();
+
+		try {
+			List<StorageObject> bucketFiles = StorageClient.listBucket(bucketName);
+
+			for (StorageObject item : bucketFiles) {
+				returnFiles.add(item.getName());
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (GeneralSecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return returnFiles;
+	}
+
 }

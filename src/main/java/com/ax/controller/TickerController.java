@@ -23,8 +23,8 @@ public class TickerController {
 
 	@Async
 	@RequestMapping("/sync")
-	public void Sync() {
-		orquestrator.SyncFiles();
+	public void Sync(@RequestParam(value = "segment", required = false) String segment) {
+		orquestrator.SyncFiles(segment);
 	}
 
 	@Async
@@ -37,6 +37,11 @@ public class TickerController {
 	@RequestMapping("/find")
 	public List<TickModel> findById(@RequestParam("symbol") String symbol) {
 		return repository.findBySimbolo(symbol);
+	}
+
+	@RequestMapping("/list")
+	public List<String> listSavesFiles() {
+		return orquestrator.GetSavedFiles();
 	}
 
 }

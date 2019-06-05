@@ -9,8 +9,6 @@ import java.net.SocketException;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,10 +34,10 @@ public class FtpService {
 
 	private FTPClient ftpClient;
 
-	@PostConstruct
-	private void init() throws SocketException, IOException {
+	private void connect() throws SocketException, IOException {
 		if (ftpClient == null) {
 			ftpClient = new FTPClient();
+			ftpClient.setConnectTimeout(60000 * 60);
 			ftpClient.connect(ftpServer, ftpPort);
 			ftpClient.login(ftpUser, ftpPassword);
 			ftpClient.enterLocalPassiveMode();
@@ -47,18 +45,34 @@ public class FtpService {
 		}
 	}
 
+	private void disconnect() throws IOException {
+		if (ftpClient != null) {
+			ftpClient.disconnect();
+			ftpClient = null;
+		}
+	}
+
 	public List<String> ListFiles(String directory) throws SocketException, IOException {
-		String[] files = ftpClient.listNames(rootDirectory + directory);
-		return Arrays.asList(files);
+		try {
+			connect();
+			String[] files = ftpClient.listNames(rootDirectory + directory);
+			return Arrays.asList(files);
+		} finally {
+			disconnect();
+		}
 	}
 
 	public boolean Download(String ftpFile, String tempFile) throws IOException {
-		File downloadFile = new File(tempFile);
-		downloadFile.getParentFile().mkdirs();
-		OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(downloadFile));
-		boolean success = ftpClient.retrieveFile(ftpFile, outputStream);
-		outputStream.close();
-		return success;
+		try {
+			connect();
+			File downloadFile = new File(tempFile);
+			downloadFile.getParentFile().mkdirs();
+			OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(downloadFile));
+			boolean success = ftpClient.retrieveFile(ftpFile, outputStream);
+			outputStream.close();
+			return success;
+		} finally {
+			disconnect();
+		}
 	}
-
 }
