@@ -35,13 +35,12 @@ public class TickerController {
 	}
 
 	@RequestMapping("/find")
-	public List<TickModel> findById(@RequestParam("symbol") String symbol) {
-		return repository.findBySimbolo(symbol);
+	public List<TickModel> findById(@RequestParam("symbol") String symbol, @RequestParam("quantity") Long quantity) {
+		return repository.findBySimboloAndQuantidade(symbol, quantity);
 	}
 
 	@RequestMapping("/list")
 	public List<String> listSavesFiles() {
 		return orquestrator.GetSavedFiles();
 	}
-
 }
