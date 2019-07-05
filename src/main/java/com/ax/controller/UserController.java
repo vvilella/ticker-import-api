@@ -16,7 +16,7 @@ public class UserController {
 	@Autowired
 	UserRepository repository;
 
-	@PostMapping("/auth")
+	@PostMapping("/login")
 	public ResponseEntity<String> auth(@RequestBody UserModel user) {
 
 		ResponseEntity<String> response = new ResponseEntity<>("User Autenticated!", HttpStatus.OK);
